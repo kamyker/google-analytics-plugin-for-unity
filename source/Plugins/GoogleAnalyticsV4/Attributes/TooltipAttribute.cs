@@ -14,15 +14,17 @@
   limitations under the License.
 */
 
-using UnityEngine;
+//using UnityEngine;
 
-/*
-  Tooltip attribute for displaying Tooltips in the inspector.
-*/
-public class TooltipAttribute : PropertyAttribute {
-  public readonly string text;
+///*
+//  Tooltip attribute for displaying Tooltips in the inspector.
+//*/
+//public class TooltipAttribute : PropertyAttribute
+//{
+//	public readonly string text;
 
-  public TooltipAttribute(string text) {
-    this.text = text;
-  }
-}
+//	public TooltipAttribute(string text)
+//	{
+//		this.text = text;
+//	}
+//}
