@@ -6,7 +6,8 @@
   ```  
   "com.ks.windows.googleanalytics": "https://github.com/kamyker/google-analytics-unity-windows.git", 
   ```
-
+## Changes to old plugin:
+ - Updated WWW to UnityWebRequest
 
 # OLD:
 # Google Analytics Plugin for Unity (beta)
