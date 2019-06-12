@@ -1,11 +1,20 @@
+# Fork of GA Plugin for Unity, updating it for Windows
+
+## Installation:
+1. Open "unity_project_name/Packages/manifest.json"
+2. Under "dependencies" add:
+  ```  
+  "com.ks.windows.googleanalytics": "https://github.com/kamyker/google-analytics-unity-windows.git", 
+  ```
+
+
+# OLD:
 # Google Analytics Plugin for Unity (beta)
 _Copyright (c) 2014 Google Inc. All rights reserved._
 
 The __Google Analytics__ Plugin for Unity allows game developers to easily implement __Google Analytics__ in their Unity games on all platforms, without having to write separate implementations. Note that this is a beta and as such may contains bugs or other issues. Please report them through the Github [issue tracker](https://github.com/googleanalytics/google-analytics-plugin-for-unity/issues) or submit a pull request. The plugin comes with no guarantees.
 
 _Unity is a trademark of Unity Technologies._ This project is not in any way endorsed or supervised by Unity Technologies.
-
-_iOS is a trademark of Apple, Inc._
 
 ## Google Analytics Plugin Documentation
 
@@ -16,11 +25,6 @@ Visit [Google Analytics Developers](https://developers.google.com/analytics/) fo
   - [Dev Guide](https://developers.google.com/analytics/devguides/collection/unity/devguide) - Learn how to setup, configure and get started with the Google Analytics Plugin for Unity.
   - [API Reference](https://developers.google.com/analytics/devguides/collection/unity/reference) - Describes how to send data and lists all of the methods for the Google Analytics Plugin for Unity.
   - [Troubleshooting](https://developers.google.com/analytics/devguides/collection/unity/troubleshoot) - Tips on debugging and troubleshooting problems with the Google Analytics Plugin for Unity.
-
-
-### Related resources
-  - [Mobile Implementation Guide](https://developers.google.com/analytics/solutions/mobile-implementation-guide) - Learn how to use Google Analytics to measure user interactions and answer questions about game usage.
-  - [Mobile App Analytics Google Group](https://groups.google.com/forum/?fromgroups#!forum/ga-mobile-app-analytics) - Community forum where you can ask and answer questions about the plugin.
 
 
 ## Thanks
