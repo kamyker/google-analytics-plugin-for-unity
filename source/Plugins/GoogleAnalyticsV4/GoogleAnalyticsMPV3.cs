@@ -19,6 +19,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
+using UnityEngine.Networking;
 
 /*
   GoogleAnalyticsMPV3 handles building hits using the Measurement Protocol.
@@ -164,44 +165,30 @@ public class GoogleAnalyticsMPV3
 		{
 			Debug.Log(newUrl);
 		}
-		GoogleAnalyticsV4.instance.StartCoroutine(this.HandleWWW(new WWW(newUrl)));
+		GoogleAnalyticsV4.instance.StartCoroutine(HandleWWW(UnityWebRequest.Post(newUrl, "")));
 	}
 
-	/*
-	  Make request using yield and coroutine to prevent lock up waiting on request to return.
-	*/
-	public IEnumerator HandleWWW(WWW request)
+	private IEnumerator HandleWWW(UnityWebRequest request)
 	{
-		while (!request.isDone)
+		yield return request.SendWebRequest();
+
+		if (request.isNetworkError || request.isHttpError)
 		{
-			yield return request;
-			if (request.responseHeaders.ContainsKey("STATUS"))
-			{
-				if (request.responseHeaders["STATUS"].Contains("200 OK"))
-				{
-					if (GoogleAnalyticsV4.IsLogLevelEnough(DebugMode.INFO))
-					{
-						Debug.Log("Successfully sent Google Analytics hit.");
-					}
-				}
-				else
-				{
-					if (GoogleAnalyticsV4.IsLogLevelEnough(DebugMode.WARNING))
-					{
-						Debug.LogWarning("Google Analytics hit request rejected with " +
-							 "status code " + request.responseHeaders["STATUS"]);
-					}
-				}
-			}
-			else
-			{
-				if (GoogleAnalyticsV4.IsLogLevelEnough(DebugMode.WARNING))
-				{
-					Debug.LogWarning("Google Analytics hit request failed with error "
-						 + request.error);
-				}
-			}
+			Debug.LogWarning("Google Analytics hit request failed with error "
+				 + request.error);
 		}
+		else
+		{
+			if (request.responseCode == 200)
+			{
+				if (GoogleAnalyticsV4.IsLogLevelEnough(DebugMode.INFO))
+					Debug.Log("Successfully sent Google Analytics hit.");
+			}
+			else if (GoogleAnalyticsV4.IsLogLevelEnough(DebugMode.WARNING))
+				Debug.LogWarning("Google Analytics hit request rejected with " +
+					 "status code " + request.responseCode);
+		}
+
 	}
 
 	private string AddRequiredMPParameter(Field parameter, object value)
