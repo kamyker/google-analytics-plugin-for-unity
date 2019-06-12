@@ -6,7 +6,9 @@
   ```  
   "com.ks.windows.googleanalytics": "https://github.com/kamyker/google-analytics-unity-windows.git", 
   ```
-## Changes to old plugin:
+## Changes to old version:
+ - Game end sends EndSession event (OnDestroy in GAv4 prefab)
+ - Launch event sends StartSession
  - Updated WWW to UnityWebRequest
 
 # OLD:
