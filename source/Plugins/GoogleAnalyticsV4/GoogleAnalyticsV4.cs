@@ -15,9 +15,6 @@
 */
 
 using UnityEngine;
-using System;
-using System.Collections;
-using System.Collections.Generic;
 
 /*
   GoogleAnalyticsV4 is an interface for developers to send hits to Google
@@ -30,484 +27,396 @@ using System.Collections.Generic;
   pass a builder to the same method name in order to add custom metrics or
   custom dimensions to the hit.
 */
-public class GoogleAnalyticsV4 : MonoBehaviour {
-  private string uncaughtExceptionStackTrace = null;
-  private bool initialized = false;
+public class GoogleAnalyticsV4 : MonoBehaviour
+{
+	private string uncaughtExceptionStackTrace = null;
+	private bool initialized = false;
 
-  public enum DebugMode {
-    ERROR,
-    WARNING,
-    INFO,
-    VERBOSE };
+	public enum DebugMode
+	{
+		ERROR,
+		WARNING,
+		INFO,
+		VERBOSE
+	};
 
-  [Tooltip("The tracking code to be used for Android. Example value: UA-XXXX-Y.")]
-  public string androidTrackingCode;
-  [Tooltip("The tracking code to be used for iOS. Example value: UA-XXXX-Y.")]
-  public string IOSTrackingCode;
-  [Tooltip("The tracking code to be used for platforms other than Android and iOS. Example value: UA-XXXX-Y.")]
-  public string otherTrackingCode;
+	[Tooltip("The tracking code to be used for platforms other than Android and iOS. Example value: UA-XXXX-Y.")]
+	public string trackingCode;
 
-  [Tooltip("The application name. This value should be modified in the " +
-      "Unity Player Settings.")]
-  public string productName;
+	[HideInInspector]
+	[Tooltip("The application name. This value should be modified in the " +
+		 "Unity Player Settings.")]
+	public string productName;
 
-  [Tooltip("The application identifier. Example value: com.company.app.")]
-  public string bundleIdentifier;
+	[HideInInspector]
+	[Tooltip("The application identifier. Example value: com.company.app.")]
+	public string bundleIdentifier;
 
-  [Tooltip("The application version. Example value: 1.2")]
-  public string bundleVersion;
+	[HideInInspector]
+	[Tooltip("The application version. Example value: 1.2")]
+	public string bundleVersion;
 
-  [RangedTooltip("The dispatch period in seconds. Only required for Android " +
-      "and iOS.", 0, 3600)]
-  public int dispatchPeriod = 5;
+	[Range(0, 3600),
+		Tooltip("The dispatch period in seconds. Only required for Android and iOS.")]
+	public int dispatchPeriod = 5;
 
-  [RangedTooltip("The sample rate to use. Only required for Android and" +
-      " iOS.", 0, 100)]
-  public int sampleFrequency = 100;
+	[Range(0, 100),
+		Tooltip("The sample rate to use. Only required for Android and iOS.")]
+	public int sampleFrequency = 100;
 
-  [Tooltip("The log level. Default is WARNING.")]
-  public DebugMode logLevel = DebugMode.WARNING;
+	[Tooltip("The log level. Default is WARNING.")]
+	public DebugMode logLevel = DebugMode.WARNING;
 
-  [Tooltip("If checked, the IP address of the sender will be anonymized.")]
-  public bool anonymizeIP = false;
+	[Tooltip("If checked, the IP address of the sender will be anonymized.")]
+	public bool anonymizeIP = false;
 
-  [Tooltip("Automatically report uncaught exceptions.")]
-  public bool UncaughtExceptionReporting = false;
+	[Tooltip("Automatically report uncaught exceptions.")]
+	public bool UncaughtExceptionReporting = false;
 
-  [Tooltip("Automatically send a launch event when the game starts up.")]
-  public bool sendLaunchEvent = false;
+	[Tooltip("Automatically send a launch event when the game starts up.")]
+	public bool sendLaunchEvent = false;
 
-  [Tooltip("If checked, hits will not be dispatched. Use for testing.")]
-  public bool dryRun = false;
+	[Tooltip("If checked, hits will not be dispatched. Use for testing.")]
+	public bool dryRun = false;
 
-  // TODO: Create conditional textbox attribute
-  [Tooltip("The amount of time in seconds your application can stay in" +
-      "the background before the session is ended. Default is 30 minutes" +
-      " (1800 seconds). A value of -1 will disable session management.")]
-  public int sessionTimeout = 1800;
+	// TODO: Create conditional textbox attribute
+	[Tooltip("The amount of time in seconds your application can stay in" +
+		 "the background before the session is ended. Default is 30 minutes" +
+		 " (1800 seconds). A value of -1 will disable session management.")]
+	public int sessionTimeout = 1800;
 
-  [AdvertiserOptIn()]
-  public bool enableAdId = false;
+	[Tooltip("If you enable this collection, ensure that you review and adhere to the Google Analytics " +
+		 "policies for SDKs and advertising features. Click the button below to view them in your browser." +
+		 " https://support.google.com/analytics/answer/2700409")]
+	public bool enableAdId = false;
 
-  public static GoogleAnalyticsV4 instance = null;
+	public static GoogleAnalyticsV4 instance = null;
 
-  [HideInInspector]
-  public readonly static string currencySymbol = "USD";
-  public readonly static string EVENT_HIT = "createEvent";
-  public readonly static string APP_VIEW = "createAppView";
-  public readonly static string SET = "set";
-  public readonly static string SET_ALL = "setAll";
-  public readonly static string SEND = "send";
-  public readonly static string ITEM_HIT = "createItem";
-  public readonly static string TRANSACTION_HIT = "createTransaction";
-  public readonly static string SOCIAL_HIT = "createSocial";
-  public readonly static string TIMING_HIT = "createTiming";
-  public readonly static string EXCEPTION_HIT = "createException";
+	[HideInInspector]
+	public readonly static string currencySymbol = "USD";
+	public readonly static string EVENT_HIT = "createEvent";
+	public readonly static string APP_VIEW = "createAppView";
+	public readonly static string SET = "set";
+	public readonly static string SET_ALL = "setAll";
+	public readonly static string SEND = "send";
+	public readonly static string ITEM_HIT = "createItem";
+	public readonly static string TRANSACTION_HIT = "createTransaction";
+	public readonly static string SOCIAL_HIT = "createSocial";
+	public readonly static string TIMING_HIT = "createTiming";
+	public readonly static string EXCEPTION_HIT = "createException";
 
-#if UNITY_ANDROID && !UNITY_EDITOR
-  private GoogleAnalyticsAndroidV4 androidTracker = new GoogleAnalyticsAndroidV4();
-#elif UNITY_IPHONE && !UNITY_EDITOR
-  private GoogleAnalyticsiOSV3 iosTracker = new GoogleAnalyticsiOSV3();
-#else
-  private GoogleAnalyticsMPV3 mpTracker = new GoogleAnalyticsMPV3();
-#endif
+	private GoogleAnalyticsMPV3 mpTracker = new GoogleAnalyticsMPV3();
 
-  void Awake() {
-    InitializeTracker ();
-    if (sendLaunchEvent) {
-      LogEvent("Google Analytics", "Auto Instrumentation", "Game Launch", 0);
-    }
+	void Awake()
+	{
+		InitializeTracker();
+		if (sendLaunchEvent)
+			LogEvent("Google Analytics", "Auto Instrumentation", "Game Launch", 0);
 
-    if (UncaughtExceptionReporting) {
-#if UNITY_5 || UNITY_2017
-      Application.logMessageReceived += HandleException;
-#else
-      Application.RegisterLogCallback (HandleException);
-#endif
-      if (GoogleAnalyticsV4.belowThreshold(logLevel, GoogleAnalyticsV4.DebugMode.VERBOSE)) {
-        Debug.Log("Enabling uncaught exception reporting.");
-      }
-    }
-  }
+		if (UncaughtExceptionReporting)
+		{
+			Application.logMessageReceived += HandleException;
+			if (belowThreshold(logLevel, DebugMode.VERBOSE))
+			{
+				Debug.Log("Enabling uncaught exception reporting.");
+			}
+		}
+	}
 
-  void Update() {
-    if (!string.IsNullOrEmpty(uncaughtExceptionStackTrace)) {
-      LogException(uncaughtExceptionStackTrace, true);
-      uncaughtExceptionStackTrace = null;
-    }
-  }
+	void Update()
+	{
+		if (!string.IsNullOrEmpty(uncaughtExceptionStackTrace))
+		{
+			LogException(uncaughtExceptionStackTrace, true);
+			uncaughtExceptionStackTrace = null;
+		}
+	}
 
-  private void HandleException(string condition, string stackTrace, LogType type) {
-    if (type == LogType.Exception) {
-      uncaughtExceptionStackTrace = condition + "\n" + stackTrace
-          + UnityEngine.StackTraceUtility.ExtractStackTrace();
-    }
-  }
+	private void HandleException(string condition, string stackTrace, LogType type)
+	{
+		if (type == LogType.Exception)
+		{
+			uncaughtExceptionStackTrace = condition + "\n" + stackTrace
+				 + StackTraceUtility.ExtractStackTrace();
+		}
+	}
 
-  // TODO: Error checking on initialization parameters
-  private void InitializeTracker() {
-    if (!initialized) {
-      instance = this;
+	// TODO: Error checking on initialization parameters
+	private void InitializeTracker()
+	{
+		if (!initialized)
+		{
+			instance = this;
 
-      DontDestroyOnLoad(instance);
+			DontDestroyOnLoad(instance);
 
-      // automatically set app parameters from player settings if they are left empty
-      if(string.IsNullOrEmpty(productName)) {
-        productName = Application.productName;
-      }
-      if(string.IsNullOrEmpty(bundleIdentifier)) {
-#if UNITY_5
-        bundleIdentifier = Application.bundleIdentifier;
-#elif UNITY_2017
-        bundleIdentifier = Application.identifier;
-#endif
-      }
-      if(string.IsNullOrEmpty(bundleVersion)) {
-        bundleVersion = Application.version;
-      }
+			// automatically set app parameters from player settings if they are left empty
+			if (string.IsNullOrEmpty(productName))
+				productName = Application.productName;
 
-      Debug.Log("Initializing Google Analytics 0.2.");
-#if UNITY_ANDROID && !UNITY_EDITOR
-      androidTracker.SetTrackingCode(androidTrackingCode);
-      androidTracker.SetAppName(productName);
-      androidTracker.SetBundleIdentifier(bundleIdentifier);
-      androidTracker.SetAppVersion(bundleVersion);
-      androidTracker.SetDispatchPeriod(dispatchPeriod);
-      androidTracker.SetSampleFrequency(sampleFrequency);
-      androidTracker.SetLogLevelValue(logLevel);
-      androidTracker.SetAnonymizeIP(anonymizeIP);
-      androidTracker.SetAdIdCollection(enableAdId);
-      androidTracker.SetDryRun(dryRun);
-      androidTracker.InitializeTracker();
-#elif UNITY_IPHONE && !UNITY_EDITOR
-      iosTracker.SetTrackingCode(IOSTrackingCode);
-      iosTracker.SetAppName(productName);
-      iosTracker.SetBundleIdentifier(bundleIdentifier);
-      iosTracker.SetAppVersion(bundleVersion);
-      iosTracker.SetDispatchPeriod(dispatchPeriod);
-      iosTracker.SetSampleFrequency(sampleFrequency);
-      iosTracker.SetLogLevelValue(logLevel);
-      iosTracker.SetAnonymizeIP(anonymizeIP);
-      iosTracker.SetAdIdCollection(enableAdId);
-      iosTracker.SetDryRun(dryRun);
-      iosTracker.InitializeTracker();
-#else
-      mpTracker.SetTrackingCode(otherTrackingCode);
-      mpTracker.SetBundleIdentifier(bundleIdentifier);
-      mpTracker.SetAppName(productName);
-      mpTracker.SetAppVersion(bundleVersion);
-      mpTracker.SetLogLevelValue(logLevel);
-      mpTracker.SetAnonymizeIP(anonymizeIP);
-      mpTracker.SetDryRun(dryRun);
-      mpTracker.InitializeTracker();
-#endif
-      initialized = true;
-      SetOnTracker(Fields.DEVELOPER_ID, "GbOCSs");
-    }
-  }
+			if (string.IsNullOrEmpty(bundleIdentifier))
+				bundleIdentifier = Application.identifier;
 
-  public void SetAppLevelOptOut(bool optOut) {
-    InitializeTracker();
-#if UNITY_ANDROID && !UNITY_EDITOR
-    androidTracker.SetOptOut(optOut);
-#elif UNITY_IPHONE && !UNITY_EDITOR
-    iosTracker.SetOptOut(optOut);
-#else
-    mpTracker.SetOptOut(optOut);
-#endif
-  }
+			if (string.IsNullOrEmpty(bundleVersion))
+				bundleVersion = Application.version;
 
-  public void SetUserIDOverride(string userID) {
-    SetOnTracker(Fields.USER_ID, userID);
-  }
+			Debug.Log("Initializing Google Analytics 0.2.");
+			mpTracker.SetTrackingCode(trackingCode);
+			mpTracker.SetBundleIdentifier(bundleIdentifier);
+			mpTracker.SetAppName(productName);
+			mpTracker.SetAppVersion(bundleVersion);
+			mpTracker.SetLogLevelValue(logLevel);
+			mpTracker.SetAnonymizeIP(anonymizeIP);
+			mpTracker.SetDryRun(dryRun);
+			mpTracker.InitializeTracker();
 
-  public void ClearUserIDOverride() {
-    InitializeTracker();
-#if UNITY_ANDROID && !UNITY_EDITOR
-    androidTracker.ClearUserIDOverride();
-#elif UNITY_IPHONE && !UNITY_EDITOR
-    iosTracker.ClearUserIDOverride();
-#else
-    mpTracker.ClearUserIDOverride();
-#endif
-  }
+			initialized = true;
+			SetOnTracker(Fields.DEVELOPER_ID, "GbOCSs");
+		}
+	}
 
-public void DispatchHits() {
-  InitializeTracker();
-#if UNITY_ANDROID && !UNITY_EDITOR
-  androidTracker.DispatchHits();
-#elif UNITY_IPHONE && !UNITY_EDITOR
-  iosTracker.DispatchHits();
-#else
-  //Do nothing
-#endif
-}
+	public void SetAppLevelOptOut(bool optOut)
+	{
+		InitializeTracker();
+		mpTracker.SetOptOut(optOut);
+	}
 
-  public void StartSession() {
-    InitializeTracker();
-#if UNITY_ANDROID && !UNITY_EDITOR
-    androidTracker.StartSession();
-#elif UNITY_IPHONE  && !UNITY_EDITOR
-    iosTracker.StartSession();
-#else
-    mpTracker.StartSession();
-#endif
-  }
+	public void SetUserIDOverride(string userID)
+	{
+		SetOnTracker(Fields.USER_ID, userID);
+	}
 
-  public void StopSession() {
-    InitializeTracker();
-#if UNITY_ANDROID && !UNITY_EDITOR
-    androidTracker.StopSession();
-#elif UNITY_IPHONE && !UNITY_EDITOR
-    iosTracker.StopSession();
-#else
-    mpTracker.StopSession();
-#endif
-  }
+	public void ClearUserIDOverride()
+	{
+		InitializeTracker();
+		mpTracker.ClearUserIDOverride();
+	}
 
-  // Use values from Fields for the fieldName parameter ie. Fields.SCREEN_NAME
-  public void SetOnTracker(Field fieldName, object value) {
-    InitializeTracker();
-#if UNITY_ANDROID && !UNITY_EDITOR
-    androidTracker.SetTrackerVal(fieldName, value);
-#elif UNITY_IPHONE && !UNITY_EDITOR
-    iosTracker.SetTrackerVal(fieldName, value);
-#else
-    mpTracker.SetTrackerVal(fieldName, value);
-#endif
-  }
+	public void StartSession()
+	{
+		InitializeTracker();
+		mpTracker.StartSession();
+	}
 
-  public void LogScreen(string title) {
-    AppViewHitBuilder builder = new AppViewHitBuilder().SetScreenName(title);
-    LogScreen(builder);
-  }
+	public void StopSession()
+	{
+		InitializeTracker();
+		mpTracker.StopSession();
+	}
 
-  public void LogScreen(AppViewHitBuilder builder) {
-    InitializeTracker();
-    if (builder.Validate() == null) {
-      return;
-    }
-    if (GoogleAnalyticsV4.belowThreshold(logLevel, GoogleAnalyticsV4.DebugMode.VERBOSE)) {
-      Debug.Log("Logging screen.");
-    }
-#if UNITY_ANDROID && !UNITY_EDITOR
-    androidTracker.LogScreen(builder);
-#elif UNITY_IPHONE && !UNITY_EDITOR
-    iosTracker.LogScreen(builder);
-#else
-    mpTracker.LogScreen(builder);
-#endif
-  }
+	// Use values from Fields for the fieldName parameter ie. Fields.SCREEN_NAME
+	public void SetOnTracker(Field fieldName, object value)
+	{
+		InitializeTracker();
+		mpTracker.SetTrackerVal(fieldName, value);
+	}
 
-  public void LogEvent(string eventCategory, string eventAction,
-      string eventLabel, long value) {
-    EventHitBuilder builder = new EventHitBuilder()
-        .SetEventCategory(eventCategory)
-        .SetEventAction(eventAction)
-        .SetEventLabel(eventLabel)
-        .SetEventValue(value);
+	public void LogScreen(string title)
+	{
+		AppViewHitBuilder builder = new AppViewHitBuilder().SetScreenName(title);
+		LogScreen(builder);
+	}
 
-    LogEvent(builder);
-  }
+	public void LogScreen(AppViewHitBuilder builder)
+	{
+		InitializeTracker();
+		if (builder.Validate() == null)
+			return;
 
-  public void LogEvent(EventHitBuilder builder) {
-    InitializeTracker();
-    if (builder.Validate() == null) {
-      return;
-    }
-    if (GoogleAnalyticsV4.belowThreshold(logLevel, GoogleAnalyticsV4.DebugMode.VERBOSE)) {
-      Debug.Log("Logging event.");
-    }
-#if UNITY_ANDROID && !UNITY_EDITOR
-    androidTracker.LogEvent (builder);
-#elif UNITY_IPHONE && !UNITY_EDITOR
-    iosTracker.LogEvent(builder);
-#else
-    mpTracker.LogEvent(builder);
-#endif
-  }
+		if (belowThreshold(logLevel, DebugMode.VERBOSE))
+			Debug.Log("Logging screen.");
 
-  public void LogTransaction(string transID, string affiliation,
-      double revenue, double tax, double shipping) {
-    LogTransaction (transID, affiliation, revenue, tax, shipping, "");
-  }
+		mpTracker.LogScreen(builder);
+	}
 
-  public void LogTransaction(string transID, string affiliation,
-      double revenue, double tax, double shipping, string currencyCode) {
-    TransactionHitBuilder builder = new TransactionHitBuilder()
-        .SetTransactionID(transID)
-        .SetAffiliation(affiliation)
-        .SetRevenue(revenue)
-        .SetTax(tax)
-        .SetShipping(shipping)
-        .SetCurrencyCode(currencyCode);
+	public void LogEvent(string eventCategory, string eventAction,
+		 string eventLabel, long value)
+	{
+		EventHitBuilder builder = new EventHitBuilder()
+			 .SetEventCategory(eventCategory)
+			 .SetEventAction(eventAction)
+			 .SetEventLabel(eventLabel)
+			 .SetEventValue(value);
 
-    LogTransaction(builder);
-  }
+		LogEvent(builder);
+	}
 
-  public void LogTransaction(TransactionHitBuilder builder) {
-    InitializeTracker();
-    if (builder.Validate() == null) {
-      return;
-    }
-    if (GoogleAnalyticsV4.belowThreshold(logLevel, GoogleAnalyticsV4.DebugMode.VERBOSE)) {
-      Debug.Log("Logging transaction.");
-    }
-#if UNITY_ANDROID && !UNITY_EDITOR
-    androidTracker.LogTransaction(builder);
-#elif UNITY_IPHONE && !UNITY_EDITOR
-    iosTracker.LogTransaction(builder);
-#else
-    mpTracker.LogTransaction(builder);
-  #endif
-  }
+	public void LogEvent(EventHitBuilder builder)
+	{
+		InitializeTracker();
 
-  public void LogItem(string transID, string name, string sku,
-      string category, double price, long quantity) {
-    LogItem (transID, name, sku, category, price, quantity, null);
-  }
+		if (builder.Validate() == null)
+			return;
 
-  public void LogItem(string transID, string name, string sku,
-      string category, double price, long quantity, string currencyCode) {
-    ItemHitBuilder builder = new ItemHitBuilder()
-        .SetTransactionID(transID)
-        .SetName(name)
-        .SetSKU(sku)
-        .SetCategory(category)
-        .SetPrice(price)
-        .SetQuantity(quantity)
-        .SetCurrencyCode(currencyCode);
+		if (belowThreshold(logLevel, DebugMode.VERBOSE))
+			Debug.Log("Logging event.");
 
-    LogItem(builder);
-  }
+		mpTracker.LogEvent(builder);
+	}
 
-  public void LogItem(ItemHitBuilder builder) {
-    InitializeTracker();
-    if (builder.Validate() == null) {
-      return;
-    }
-    if (GoogleAnalyticsV4.belowThreshold(logLevel, GoogleAnalyticsV4.DebugMode.VERBOSE)) {
-      Debug.Log("Logging item.");
-    }
-#if UNITY_ANDROID && !UNITY_EDITOR
-    androidTracker.LogItem(builder);
-#elif UNITY_IPHONE && !UNITY_EDITOR
-    iosTracker.LogItem(builder);
-#else
-    mpTracker.LogItem(builder);
-#endif
-  }
+	public void LogTransaction(string transID, string affiliation,
+		 double revenue, double tax, double shipping)
+	{
+		LogTransaction(transID, affiliation, revenue, tax, shipping, "");
+	}
 
-  public void LogException(string exceptionDescription, bool isFatal) {
-    ExceptionHitBuilder builder = new ExceptionHitBuilder()
-        .SetExceptionDescription(exceptionDescription)
-        .SetFatal(isFatal);
+	public void LogTransaction(string transID, string affiliation,
+		 double revenue, double tax, double shipping, string currencyCode)
+	{
+		TransactionHitBuilder builder = new TransactionHitBuilder()
+			 .SetTransactionID(transID)
+			 .SetAffiliation(affiliation)
+			 .SetRevenue(revenue)
+			 .SetTax(tax)
+			 .SetShipping(shipping)
+			 .SetCurrencyCode(currencyCode);
 
-    LogException(builder);
-  }
+		LogTransaction(builder);
+	}
 
-  public void LogException(ExceptionHitBuilder builder) {
-    InitializeTracker();
-    if (builder.Validate() == null) {
-      return;
-    }
-    if (GoogleAnalyticsV4.belowThreshold(logLevel, GoogleAnalyticsV4.DebugMode.VERBOSE)) {
-      Debug.Log("Logging exception.");
-    }
-#if UNITY_ANDROID && !UNITY_EDITOR
-    androidTracker.LogException(builder);
-#elif UNITY_IPHONE && !UNITY_EDITOR
-    iosTracker.LogException(builder);
-#else
-    mpTracker.LogException(builder);
-#endif
-  }
+	public void LogTransaction(TransactionHitBuilder builder)
+	{
+		InitializeTracker();
+		if (builder.Validate() == null)
+			return;
 
-  public void LogSocial(string socialNetwork, string socialAction,
-      string socialTarget) {
-    SocialHitBuilder builder = new SocialHitBuilder()
-        .SetSocialNetwork(socialNetwork)
-        .SetSocialAction(socialAction)
-        .SetSocialTarget(socialTarget);
+		if (belowThreshold(logLevel, DebugMode.VERBOSE))
+			Debug.Log("Logging transaction.");
 
-    LogSocial(builder);
-  }
+		mpTracker.LogTransaction(builder);
+	}
 
-  public void LogSocial(SocialHitBuilder builder) {
-    InitializeTracker();
-    if (builder.Validate() == null) {
-      return;
-    }
-    if (GoogleAnalyticsV4.belowThreshold(logLevel, GoogleAnalyticsV4.DebugMode.VERBOSE)) {
-      Debug.Log("Logging social.");
-    }
-#if UNITY_ANDROID && !UNITY_EDITOR
-    androidTracker.LogSocial(builder);
-#elif UNITY_IPHONE && !UNITY_EDITOR
-    iosTracker.LogSocial(builder);
-#else
-    mpTracker.LogSocial(builder);
-#endif
-  }
+	public void LogItem(string transID, string name, string sku,
+		 string category, double price, long quantity)
+	{
+		LogItem(transID, name, sku, category, price, quantity, null);
+	}
 
-  public void LogTiming(string timingCategory, long timingInterval,
-      string timingName, string timingLabel) {
-    TimingHitBuilder builder = new TimingHitBuilder()
-        .SetTimingCategory(timingCategory)
-        .SetTimingInterval(timingInterval)
-        .SetTimingName(timingName)
-        .SetTimingLabel(timingLabel);
+	public void LogItem(string transID, string name, string sku,
+		 string category, double price, long quantity, string currencyCode)
+	{
+		ItemHitBuilder builder = new ItemHitBuilder()
+			 .SetTransactionID(transID)
+			 .SetName(name)
+			 .SetSKU(sku)
+			 .SetCategory(category)
+			 .SetPrice(price)
+			 .SetQuantity(quantity)
+			 .SetCurrencyCode(currencyCode);
 
-    LogTiming(builder);
-  }
+		LogItem(builder);
+	}
 
-  public void LogTiming(TimingHitBuilder builder) {
-    InitializeTracker();
-    if (builder.Validate() == null) {
-      return;
-    }
-    if (GoogleAnalyticsV4.belowThreshold(logLevel, GoogleAnalyticsV4.DebugMode.VERBOSE)) {
-      Debug.Log("Logging timing.");
-    }
-#if UNITY_ANDROID && !UNITY_EDITOR
-    androidTracker.LogTiming(builder);
-#elif UNITY_IPHONE && !UNITY_EDITOR
-    iosTracker.LogTiming(builder);
-#else
-    mpTracker.LogTiming(builder);
-#endif
-  }
+	public void LogItem(ItemHitBuilder builder)
+	{
+		InitializeTracker();
+		if (builder.Validate() == null)
+			return;
 
-  public void Dispose() {
-    initialized = false;
-#if UNITY_ANDROID && !UNITY_EDITOR
-    androidTracker.Dispose();
-#elif UNITY_IPHONE && !UNITY_EDITOR
-#else
-#endif
-  }
+		if (belowThreshold(logLevel, DebugMode.VERBOSE))
+			Debug.Log("Logging item.");
 
-  public static bool belowThreshold(GoogleAnalyticsV4.DebugMode userLogLevel,
-      GoogleAnalyticsV4.DebugMode comparelogLevel) {
-    if (comparelogLevel == userLogLevel) {
-      return true;
-    } else if (userLogLevel == GoogleAnalyticsV4.DebugMode.ERROR) {
-      return false;
-    } else if (userLogLevel == GoogleAnalyticsV4.DebugMode.VERBOSE) {
-      return true;
-    } else if (userLogLevel == GoogleAnalyticsV4.DebugMode.WARNING &&
-      (comparelogLevel == GoogleAnalyticsV4.DebugMode.INFO ||
-      comparelogLevel == GoogleAnalyticsV4.DebugMode.VERBOSE)) {
-      return false;
-    } else if (userLogLevel == GoogleAnalyticsV4.DebugMode.INFO &&
-      (comparelogLevel == GoogleAnalyticsV4.DebugMode.VERBOSE)) {
-      return false;
-    }
-    return true;
-  }
+		mpTracker.LogItem(builder);
+	}
 
-  // Instance for running Coroutines from platform specific classes
-  public static GoogleAnalyticsV4 getInstance() {
-    return instance;
-  }
+	public void LogException(string exceptionDescription, bool isFatal)
+	{
+		ExceptionHitBuilder builder = new ExceptionHitBuilder()
+			 .SetExceptionDescription(exceptionDescription)
+			 .SetFatal(isFatal);
+
+		LogException(builder);
+	}
+
+	public void LogException(ExceptionHitBuilder builder)
+	{
+		InitializeTracker();
+		if (builder.Validate() == null)
+			return;
+
+		if (belowThreshold(logLevel, DebugMode.VERBOSE))
+			Debug.Log("Logging exception.");
+
+		mpTracker.LogException(builder);
+	}
+
+	public void LogSocial(string socialNetwork, string socialAction,
+		 string socialTarget)
+	{
+		SocialHitBuilder builder = new SocialHitBuilder()
+			 .SetSocialNetwork(socialNetwork)
+			 .SetSocialAction(socialAction)
+			 .SetSocialTarget(socialTarget);
+
+		LogSocial(builder);
+	}
+
+	public void LogSocial(SocialHitBuilder builder)
+	{
+		InitializeTracker();
+		if (builder.Validate() == null)
+			return;
+
+		if (belowThreshold(logLevel, DebugMode.VERBOSE))
+			Debug.Log("Logging social.");
+
+		mpTracker.LogSocial(builder);
+	}
+
+	public void LogTiming(string timingCategory, long timingInterval,
+		 string timingName, string timingLabel)
+	{
+		TimingHitBuilder builder = new TimingHitBuilder()
+			 .SetTimingCategory(timingCategory)
+			 .SetTimingInterval(timingInterval)
+			 .SetTimingName(timingName)
+			 .SetTimingLabel(timingLabel);
+
+		LogTiming(builder);
+	}
+
+	public void LogTiming(TimingHitBuilder builder)
+	{
+		InitializeTracker();
+		if (builder.Validate() == null)
+			return;
+
+		if (belowThreshold(logLevel, DebugMode.VERBOSE))
+			Debug.Log("Logging timing.");
+
+		mpTracker.LogTiming(builder);
+	}
+
+	public void Dispose()
+	{
+		initialized = false;
+	}
+
+	public static bool belowThreshold(DebugMode userLogLevel, DebugMode comparelogLevel)
+	{
+		if (comparelogLevel == userLogLevel)
+		{
+			return true;
+		}
+		else if (userLogLevel == GoogleAnalyticsV4.DebugMode.ERROR)
+		{
+			return false;
+		}
+		else if (userLogLevel == GoogleAnalyticsV4.DebugMode.VERBOSE)
+		{
+			return true;
+		}
+		else if (userLogLevel == GoogleAnalyticsV4.DebugMode.WARNING &&
+		(comparelogLevel == GoogleAnalyticsV4.DebugMode.INFO ||
+		comparelogLevel == GoogleAnalyticsV4.DebugMode.VERBOSE))
+		{
+			return false;
+		}
+		else if (userLogLevel == GoogleAnalyticsV4.DebugMode.INFO &&
+		(comparelogLevel == GoogleAnalyticsV4.DebugMode.VERBOSE))
+		{
+			return false;
+		}
+		return true;
+	}
 }

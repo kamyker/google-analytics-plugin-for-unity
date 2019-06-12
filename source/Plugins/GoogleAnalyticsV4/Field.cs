@@ -14,16 +14,19 @@
   limitations under the License.
 */
 
-public class Field {
+public class Field
+{
 
-  private readonly string parameter;
+	private readonly string parameter;
 
-  public Field(string parameter){
-    this.parameter = parameter;
-  }
+	public Field(string parameter)
+	{
+		this.parameter = parameter;
+	}
 
-  public override string ToString(){
-    return parameter;
-  }
+	public override string ToString()
+	{
+		return parameter;
+	}
 
 }
