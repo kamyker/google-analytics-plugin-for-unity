@@ -12,7 +12,6 @@
  - Updated WWW to UnityWebRequest
 
 # OLD:
-# Google Analytics Plugin for Unity (beta)
 _Copyright (c) 2014 Google Inc. All rights reserved._
 
 The __Google Analytics__ Plugin for Unity allows game developers to easily implement __Google Analytics__ in their Unity games on all platforms, without having to write separate implementations. Note that this is a beta and as such may contains bugs or other issues. Please report them through the Github [issue tracker](https://github.com/googleanalytics/google-analytics-plugin-for-unity/issues) or submit a pull request. The plugin comes with no guarantees.
