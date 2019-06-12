@@ -7,7 +7,7 @@
   "com.ks.windows.googleanalytics": "https://github.com/kamyker/google-analytics-unity-windows.git", 
   ```
 ## Changes to old version:
- - **Added LogPageView(string location, (optional)string title)**, use this instead of LogScreen as they are much better integrated, work in realtime and in user explorer. 
+ - **Added LogPageView(string location, (optional)string title)**, use this instead of LogScreen as it is much better integrated in GA, works in realtime and in user explorer. 
  
 Ex: `GoogleAnalytics.instance.LogPageView("MainMenu/Settings")`
 ![GitHub Logo](/imgs~/pageview_example.png)
