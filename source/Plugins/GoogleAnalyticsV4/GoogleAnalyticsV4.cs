@@ -32,14 +32,6 @@ public class GoogleAnalyticsV4 : MonoBehaviour
 	private string uncaughtExceptionStackTrace = null;
 	private bool initialized = false;
 
-	public enum DebugMode
-	{
-		ERROR = 0,
-		WARNING = 1,
-		INFO = 2,
-		VERBOSE = 3
-	};
-
 	[Tooltip("The tracking code to be used for platforms other than Android and iOS. Example value: UA-XXXX-Y.")]
 	public string trackingCode;
 
@@ -112,7 +104,7 @@ public class GoogleAnalyticsV4 : MonoBehaviour
 		if (UncaughtExceptionReporting)
 		{
 			Application.logMessageReceived += HandleException;
-			if (belowThreshold(logLevel, DebugMode.VERBOSE))
+			if (IsLogLevelEnough(DebugMode.VERBOSE))
 			{
 				Debug.Log("Enabling uncaught exception reporting.");
 			}
@@ -219,7 +211,7 @@ public class GoogleAnalyticsV4 : MonoBehaviour
 		if (builder.Validate() == null)
 			return;
 
-		if (belowThreshold(logLevel, DebugMode.VERBOSE))
+		if (IsLogLevelEnough(DebugMode.VERBOSE))
 			Debug.Log("Logging screen.");
 
 		mpTracker.LogScreen(builder);
@@ -244,7 +236,7 @@ public class GoogleAnalyticsV4 : MonoBehaviour
 		if (builder.Validate() == null)
 			return;
 
-		if (belowThreshold(logLevel, DebugMode.VERBOSE))
+		if (IsLogLevelEnough(DebugMode.VERBOSE))
 			Debug.Log("Logging event.");
 
 		mpTracker.LogEvent(builder);
@@ -276,7 +268,7 @@ public class GoogleAnalyticsV4 : MonoBehaviour
 		if (builder.Validate() == null)
 			return;
 
-		if (belowThreshold(logLevel, DebugMode.VERBOSE))
+		if (IsLogLevelEnough(DebugMode.VERBOSE))
 			Debug.Log("Logging transaction.");
 
 		mpTracker.LogTransaction(builder);
@@ -309,7 +301,7 @@ public class GoogleAnalyticsV4 : MonoBehaviour
 		if (builder.Validate() == null)
 			return;
 
-		if (belowThreshold(logLevel, DebugMode.VERBOSE))
+		if (IsLogLevelEnough(DebugMode.VERBOSE))
 			Debug.Log("Logging item.");
 
 		mpTracker.LogItem(builder);
@@ -330,7 +322,7 @@ public class GoogleAnalyticsV4 : MonoBehaviour
 		if (builder.Validate() == null)
 			return;
 
-		if (belowThreshold(logLevel, DebugMode.VERBOSE))
+		if (IsLogLevelEnough(DebugMode.VERBOSE))
 			Debug.Log("Logging exception.");
 
 		mpTracker.LogException(builder);
@@ -353,7 +345,7 @@ public class GoogleAnalyticsV4 : MonoBehaviour
 		if (builder.Validate() == null)
 			return;
 
-		if (belowThreshold(logLevel, DebugMode.VERBOSE))
+		if (IsLogLevelEnough(DebugMode.VERBOSE))
 			Debug.Log("Logging social.");
 
 		mpTracker.LogSocial(builder);
@@ -377,7 +369,7 @@ public class GoogleAnalyticsV4 : MonoBehaviour
 		if (builder.Validate() == null)
 			return;
 
-		if (belowThreshold(logLevel, DebugMode.VERBOSE))
+		if (IsLogLevelEnough(DebugMode.VERBOSE))
 			Debug.Log("Logging timing.");
 
 		mpTracker.LogTiming(builder);
@@ -388,8 +380,8 @@ public class GoogleAnalyticsV4 : MonoBehaviour
 		initialized = false;
 	}
 
-	public static bool belowThreshold(DebugMode userLogLevel, DebugMode comparelogLevel)
+	public static bool IsLogLevelEnough(DebugMode comparelogLevel)
 	{
-		return (int)userLogLevel >= (int)comparelogLevel;
+		return instance.logLevel.IsBelow(comparelogLevel);
 	}
 }

@@ -28,14 +28,11 @@ using System.Globalization;
 */
 public class GoogleAnalyticsMPV3
 {
-#if UNITY_ANDROID && !UNITY_EDITOR
-#elif UNITY_IPHONE && !UNITY_EDITOR
-#else
 	private string trackingCode;
 	private string bundleIdentifier;
 	private string appName;
 	private string appVersion;
-	private GoogleAnalyticsV4.DebugMode logLevel;
+	private DebugMode logLevel;
 	private bool anonymizeIP;
 	private bool dryRun;
 	private bool optOut;
@@ -57,7 +54,7 @@ public class GoogleAnalyticsMPV3
 			trackingCodeSet = false;
 			return;
 		}
-		if (GoogleAnalyticsV4.belowThreshold(logLevel, GoogleAnalyticsV4.DebugMode.INFO))
+		if (GoogleAnalyticsV4.IsLogLevelEnough(DebugMode.INFO))
 		{
 			Debug.Log("Platform is not Android or iOS - " +
 				 "hits will be sent using measurement protocol.");
@@ -90,14 +87,14 @@ public class GoogleAnalyticsMPV3
 			{
 				url += AddOptionalMPParameter(Fields.ANONYMIZE_IP, 1);
 			}
-			if (GoogleAnalyticsV4.belowThreshold(logLevel, GoogleAnalyticsV4.DebugMode.VERBOSE))
+			if (GoogleAnalyticsV4.IsLogLevelEnough(DebugMode.VERBOSE))
 			{
 				Debug.Log("Base URL for hits: " + url);
 			}
 		}
 		catch (Exception)
 		{
-			if (GoogleAnalyticsV4.belowThreshold(logLevel, GoogleAnalyticsV4.DebugMode.WARNING))
+			if (GoogleAnalyticsV4.IsLogLevelEnough(DebugMode.WARNING))
 			{
 				Debug.Log("Error building url.");
 			}
@@ -137,7 +134,7 @@ public class GoogleAnalyticsMPV3
 	{
 		if (String.IsNullOrEmpty(url))
 		{
-			if (GoogleAnalyticsV4.belowThreshold(logLevel, GoogleAnalyticsV4.DebugMode.WARNING))
+			if (GoogleAnalyticsV4.IsLogLevelEnough(DebugMode.WARNING))
 			{
 				Debug.Log("No tracking code set for 'Other' platforms - hit will not be sent.");
 			}
@@ -145,7 +142,7 @@ public class GoogleAnalyticsMPV3
 		}
 		if (dryRun || optOut)
 		{
-			if (GoogleAnalyticsV4.belowThreshold(logLevel, GoogleAnalyticsV4.DebugMode.WARNING))
+			if (GoogleAnalyticsV4.IsLogLevelEnough(DebugMode.WARNING))
 			{
 				Debug.Log("Dry run or opt out enabled - hits will not be sent.");
 			}
@@ -163,7 +160,7 @@ public class GoogleAnalyticsMPV3
 		}
 		// Add random z to avoid caching
 		string newUrl = url + "&z=" + UnityEngine.Random.Range(0, 500);
-		if (GoogleAnalyticsV4.belowThreshold(logLevel, GoogleAnalyticsV4.DebugMode.VERBOSE))
+		if (GoogleAnalyticsV4.IsLogLevelEnough(DebugMode.VERBOSE))
 		{
 			Debug.Log(newUrl);
 		}
@@ -182,14 +179,14 @@ public class GoogleAnalyticsMPV3
 			{
 				if (request.responseHeaders["STATUS"].Contains("200 OK"))
 				{
-					if (GoogleAnalyticsV4.belowThreshold(logLevel, GoogleAnalyticsV4.DebugMode.INFO))
+					if (GoogleAnalyticsV4.IsLogLevelEnough(DebugMode.INFO))
 					{
 						Debug.Log("Successfully sent Google Analytics hit.");
 					}
 				}
 				else
 				{
-					if (GoogleAnalyticsV4.belowThreshold(logLevel, GoogleAnalyticsV4.DebugMode.WARNING))
+					if (GoogleAnalyticsV4.IsLogLevelEnough(DebugMode.WARNING))
 					{
 						Debug.LogWarning("Google Analytics hit request rejected with " +
 							 "status code " + request.responseHeaders["STATUS"]);
@@ -198,7 +195,7 @@ public class GoogleAnalyticsMPV3
 			}
 			else
 			{
-				if (GoogleAnalyticsV4.belowThreshold(logLevel, GoogleAnalyticsV4.DebugMode.WARNING))
+				if (GoogleAnalyticsV4.IsLogLevelEnough(DebugMode.WARNING))
 				{
 					Debug.LogWarning("Google Analytics hit request failed with error "
 						 + request.error);
@@ -215,7 +212,7 @@ public class GoogleAnalyticsMPV3
 		}
 		else if (value == null)
 		{
-			if (GoogleAnalyticsV4.belowThreshold(logLevel, GoogleAnalyticsV4.DebugMode.WARNING))
+			if (GoogleAnalyticsV4.IsLogLevelEnough(DebugMode.WARNING))
 			{
 				Debug.LogWarning("Value was null for required parameter " + parameter + ". Hit cannot be sent");
 			}
@@ -235,7 +232,7 @@ public class GoogleAnalyticsMPV3
 		}
 		else if (value == null)
 		{
-			if (GoogleAnalyticsV4.belowThreshold(logLevel, GoogleAnalyticsV4.DebugMode.WARNING))
+			if (logLevel.IsBelow(DebugMode.WARNING))
 			{
 				Debug.LogWarning("Value was null for required parameter " + parameter + ". Hit cannot be sent");
 			}
@@ -297,7 +294,7 @@ public class GoogleAnalyticsMPV3
 
 		if (!String.IsNullOrEmpty(url))
 		{
-			if (GoogleAnalyticsV4.belowThreshold(logLevel, GoogleAnalyticsV4.DebugMode.VERBOSE))
+			if (GoogleAnalyticsV4.IsLogLevelEnough(DebugMode.VERBOSE))
 			{
 				Debug.Log("Added custom variables to hit.");
 			}
@@ -324,7 +321,7 @@ public class GoogleAnalyticsMPV3
 
 		if (!String.IsNullOrEmpty(url))
 		{
-			if (GoogleAnalyticsV4.belowThreshold(logLevel, GoogleAnalyticsV4.DebugMode.VERBOSE))
+			if (GoogleAnalyticsV4.IsLogLevelEnough(DebugMode.VERBOSE))
 			{
 				Debug.Log("Added campaign parameters to hit. url:" + url);
 			}
@@ -483,7 +480,7 @@ public class GoogleAnalyticsMPV3
 		this.appVersion = appVersion;
 	}
 
-	public void SetLogLevelValue(GoogleAnalyticsV4.DebugMode logLevel)
+	public void SetLogLevelValue(DebugMode logLevel)
 	{
 		this.logLevel = logLevel;
 	}
@@ -502,6 +499,4 @@ public class GoogleAnalyticsMPV3
 	{
 		this.optOut = optOut;
 	}
-
-#endif
 }
