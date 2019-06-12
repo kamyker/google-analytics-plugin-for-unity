@@ -7,7 +7,10 @@
   "com.ks.windows.googleanalytics": "https://github.com/kamyker/google-analytics-unity-windows.git", 
   ```
 ## Changes to old version:
- - Added LogPageView(string location, (optional)string title), use this instead of LogScreen as they are much better implemented in GA (example: `GoogleAnalytics.instance.LogPageView("MainMenu/Settings")`)
+ - **Added LogPageView(string location, (optional)string title)**, use this instead of LogScreen as they are much better integrated, work in realtime and in user explorer. 
+ 
+Ex: `GoogleAnalytics.instance.LogPageView("MainMenu/Settings")`
+![GitHub Logo](/imgs~/pageview_example.png)
  - Serialized fields like productName, version removed and pulled from Player Settings
  - Game end sends EndSession event (OnDestroy in GAv4 prefab)
  - Launch event sends StartSession
