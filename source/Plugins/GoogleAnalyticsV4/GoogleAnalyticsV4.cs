@@ -188,6 +188,24 @@ public class GoogleAnalyticsV4 : MonoBehaviour
 		mpTracker.LogScreen(builder);
 	}
 
+	public void LogPageView(string pageLocation, string pageTitle = "")
+	{
+		PageViewHitBuilder builder = new PageViewHitBuilder(pageLocation, pageTitle);
+		LogPageView(builder);
+	}
+
+	public void LogPageView(PageViewHitBuilder builder)
+	{
+		InitializeTracker();
+		if (builder.Validate() == null)
+			return;
+
+		if (IsLogLevelEnough(DebugMode.VERBOSE))
+			Debug.Log("Logging pageview.");
+
+		mpTracker.LogPageView(builder);
+	}
+
 	public void LogEvent(string eventCategory, string eventAction,
 		 string eventLabel, long value)
 	{

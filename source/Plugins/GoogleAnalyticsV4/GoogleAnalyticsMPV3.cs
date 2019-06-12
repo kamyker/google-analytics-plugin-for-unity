@@ -211,6 +211,7 @@ public class GoogleAnalyticsMPV3
 		}
 	}
 
+
 	private string AddRequiredMPParameter(Field parameter, string value)
 	{
 		if (!trackingCodeSet)
@@ -323,6 +324,20 @@ public class GoogleAnalyticsMPV3
 		SendGaHitWithMeasurementProtocol(url
 			 + AddRequiredMPParameter(Fields.HIT_TYPE, "screenview")
 			 + AddRequiredMPParameter(Fields.SCREEN_NAME, builder.GetScreenName())
+			 + AddCustomVariables(builder)
+			 + AddCampaignParameters(builder)
+			 + AddTrackerVals());
+	}
+
+	public void LogPageView(PageViewHitBuilder builder)
+	{
+		trackerValues[Fields.LOCATION] = null;
+		trackerValues[Fields.TITLE] = null;
+
+		SendGaHitWithMeasurementProtocol(url
+			 + AddRequiredMPParameter(Fields.HIT_TYPE, "pageview")
+			 + AddRequiredMPParameter(Fields.LOCATION, builder.DocumentLocationUrl)
+			 + AddOptionalMPParameter(Fields.TITLE, builder.DocumentTitle)
 			 + AddCustomVariables(builder)
 			 + AddCampaignParameters(builder)
 			 + AddTrackerVals());
