@@ -51,7 +51,7 @@ public class GoogleAnalyticsMPV3
 	{
 		if (String.IsNullOrEmpty(trackingCode))
 		{
-			Debug.Log("No tracking code set for 'Other' platforms - hits will not be set");
+			Debug.Log("No tracking code set - hits will not be set");
 			trackingCodeSet = false;
 			return;
 		}

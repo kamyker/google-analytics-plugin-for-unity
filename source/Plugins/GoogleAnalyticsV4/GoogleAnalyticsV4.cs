@@ -35,71 +35,45 @@ public class GoogleAnalyticsV4 : MonoBehaviour
 	[Tooltip("The tracking code to be used for platforms other than Android and iOS. Example value: UA-XXXX-Y.")]
 	public string trackingCode;
 
-	[HideInInspector]
-	[Tooltip("The application name. This value should be modified in the " +
-		 "Unity Player Settings.")]
-	public string productName;
+	//[Range(0, 3600),
+	//	Tooltip("The dispatch period in seconds. Only required for Android and iOS.")]
+	//public int dispatchPeriod = 5;
 
-	[HideInInspector]
-	[Tooltip("The application identifier. Example value: com.company.app.")]
-	public string bundleIdentifier;
+	//[Range(0, 100),
+	//	Tooltip("The sample rate to use. Only required for Android and iOS.")]
+	//public int sampleFrequency = 100;
 
-	[HideInInspector]
-	[Tooltip("The application version. Example value: 1.2")]
-	public string bundleVersion;
-
-	[Range(0, 3600),
-		Tooltip("The dispatch period in seconds. Only required for Android and iOS.")]
-	public int dispatchPeriod = 5;
-
-	[Range(0, 100),
-		Tooltip("The sample rate to use. Only required for Android and iOS.")]
-	public int sampleFrequency = 100;
-
-	[Tooltip("The log level. Default is WARNING.")]
-	public DebugMode logLevel = DebugMode.WARNING;
+	[Tooltip("The log level. Default is WARNING."), SerializeField]
+	private DebugMode logLevel = DebugMode.WARNING;
 
 	[Tooltip("If checked, the IP address of the sender will be anonymized.")]
-	public bool anonymizeIP = false;
+	public bool AnonymizeIP = false;
 
 	[Tooltip("Automatically report uncaught exceptions.")]
 	public bool UncaughtExceptionReporting = false;
 
 	[Tooltip("Automatically send a launch event when the game starts up.")]
-	public bool sendLaunchEvent = false;
+	public bool SendStartSessionEvent = false;
 
 	[Tooltip("If checked, hits will not be dispatched. Use for testing.")]
-	public bool dryRun = false;
+	public bool DryRun = false;
 
-	// TODO: Create conditional textbox attribute
-	[Tooltip("The amount of time in seconds your application can stay in" +
-		 "the background before the session is ended. Default is 30 minutes" +
-		 " (1800 seconds). A value of -1 will disable session management.")]
-	public int sessionTimeout = 1800;
+	// TODO: add to mp
+	//[Tooltip("The amount of time in seconds your application can stay in" +
+	//	 "the background before the session is ended. Default is 30 minutes" +
+	//	 " (1800 seconds). A value of -1 will disable session management.")]
+	//public int sessionTimeout = 1800;
 
 
 	public static GoogleAnalyticsV4 instance = null;
-
-	[HideInInspector]
-	public readonly static string currencySymbol = "USD";
-	public readonly static string EVENT_HIT = "createEvent";
-	public readonly static string APP_VIEW = "createAppView";
-	public readonly static string SET = "set";
-	public readonly static string SET_ALL = "setAll";
-	public readonly static string SEND = "send";
-	public readonly static string ITEM_HIT = "createItem";
-	public readonly static string TRANSACTION_HIT = "createTransaction";
-	public readonly static string SOCIAL_HIT = "createSocial";
-	public readonly static string TIMING_HIT = "createTiming";
-	public readonly static string EXCEPTION_HIT = "createException";
 
 	private GoogleAnalyticsMPV3 mpTracker = new GoogleAnalyticsMPV3();
 
 	void Awake()
 	{
 		InitializeTracker();
-		if (sendLaunchEvent)
-			LogEvent("Google Analytics", "Auto Instrumentation", "Game Launch", 0);
+		if (SendStartSessionEvent)
+			StartSession();
 
 		if (UncaughtExceptionReporting)
 		{
@@ -138,24 +112,14 @@ public class GoogleAnalyticsV4 : MonoBehaviour
 
 			DontDestroyOnLoad(instance);
 
-			// automatically set app parameters from player settings if they are left empty
-			if (string.IsNullOrEmpty(productName))
-				productName = Application.productName;
-
-			if (string.IsNullOrEmpty(bundleIdentifier))
-				bundleIdentifier = Application.identifier;
-
-			if (string.IsNullOrEmpty(bundleVersion))
-				bundleVersion = Application.version;
-
 			Debug.Log("Initializing Google Analytics 0.2.");
 			mpTracker.SetTrackingCode(trackingCode);
-			mpTracker.SetBundleIdentifier(bundleIdentifier);
-			mpTracker.SetAppName(productName);
-			mpTracker.SetAppVersion(bundleVersion);
+			mpTracker.SetBundleIdentifier(Application.identifier);
+			mpTracker.SetAppName(Application.productName);
+			mpTracker.SetAppVersion(Application.version);
 			mpTracker.SetLogLevelValue(logLevel);
-			mpTracker.SetAnonymizeIP(anonymizeIP);
-			mpTracker.SetDryRun(dryRun);
+			mpTracker.SetAnonymizeIP(AnonymizeIP);
+			mpTracker.SetDryRun(DryRun);
 			mpTracker.InitializeTracker();
 
 			initialized = true;
@@ -184,12 +148,19 @@ public class GoogleAnalyticsV4 : MonoBehaviour
 	{
 		InitializeTracker();
 		mpTracker.StartSession();
+		LogEvent("Google Analytics", "Auto Instrumentation", "Session started", 0);
+	}
+
+	private void OnDestroy()
+	{
+		StopSession();
 	}
 
 	public void StopSession()
 	{
 		InitializeTracker();
 		mpTracker.StopSession();
+		LogEvent("Google Analytics", "Auto Instrumentation", "Session ended", 0);
 	}
 
 	// Use values from Fields for the fieldName parameter ie. Fields.SCREEN_NAME
