@@ -34,10 +34,10 @@ public class GoogleAnalyticsV4 : MonoBehaviour
 
 	public enum DebugMode
 	{
-		ERROR,
-		WARNING,
-		INFO,
-		VERBOSE
+		ERROR = 0,
+		WARNING = 1,
+		INFO = 2,
+		VERBOSE = 3
 	};
 
 	[Tooltip("The tracking code to be used for platforms other than Android and iOS. Example value: UA-XXXX-Y.")]
@@ -390,29 +390,6 @@ public class GoogleAnalyticsV4 : MonoBehaviour
 
 	public static bool belowThreshold(DebugMode userLogLevel, DebugMode comparelogLevel)
 	{
-		if (comparelogLevel == userLogLevel)
-		{
-			return true;
-		}
-		else if (userLogLevel == GoogleAnalyticsV4.DebugMode.ERROR)
-		{
-			return false;
-		}
-		else if (userLogLevel == GoogleAnalyticsV4.DebugMode.VERBOSE)
-		{
-			return true;
-		}
-		else if (userLogLevel == GoogleAnalyticsV4.DebugMode.WARNING &&
-		(comparelogLevel == GoogleAnalyticsV4.DebugMode.INFO ||
-		comparelogLevel == GoogleAnalyticsV4.DebugMode.VERBOSE))
-		{
-			return false;
-		}
-		else if (userLogLevel == GoogleAnalyticsV4.DebugMode.INFO &&
-		(comparelogLevel == GoogleAnalyticsV4.DebugMode.VERBOSE))
-		{
-			return false;
-		}
-		return true;
+		return (int)userLogLevel >= (int)comparelogLevel;
 	}
 }
