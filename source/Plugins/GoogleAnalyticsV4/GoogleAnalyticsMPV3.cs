@@ -337,7 +337,7 @@ public class GoogleAnalyticsMPV3
 		trackerValues[Fields.SCREEN_NAME] = null;
 
 		SendGaHitWithMeasurementProtocol(url
-			 + AddRequiredMPParameter(Fields.HIT_TYPE, "appview")
+			 + AddRequiredMPParameter(Fields.HIT_TYPE, "screenview")
 			 + AddRequiredMPParameter(Fields.SCREEN_NAME, builder.GetScreenName())
 			 + AddCustomVariables(builder)
 			 + AddCampaignParameters(builder)
