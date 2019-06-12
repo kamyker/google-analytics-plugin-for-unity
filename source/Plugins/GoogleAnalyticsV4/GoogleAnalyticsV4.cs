@@ -85,10 +85,6 @@ public class GoogleAnalyticsV4 : MonoBehaviour
 		 " (1800 seconds). A value of -1 will disable session management.")]
 	public int sessionTimeout = 1800;
 
-	[Tooltip("If you enable this collection, ensure that you review and adhere to the Google Analytics " +
-		 "policies for SDKs and advertising features. Click the button below to view them in your browser." +
-		 " https://support.google.com/analytics/answer/2700409")]
-	public bool enableAdId = false;
 
 	public static GoogleAnalyticsV4 instance = null;
 
