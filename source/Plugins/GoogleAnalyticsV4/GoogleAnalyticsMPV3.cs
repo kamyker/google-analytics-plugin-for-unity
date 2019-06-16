@@ -165,13 +165,27 @@ public class GoogleAnalyticsMPV3
 		{
 			Debug.Log(newUrl);
 		}
-		GoogleAnalyticsV4.instance.StartCoroutine(HandleWWW(UnityWebRequest.Post(newUrl, "")));
+		if (GoogleAnalyticsV4.instance.RunSynchronously)
+			HandleWWWSynchronously(UnityWebRequest.Post(newUrl, ""));
+		else
+			GoogleAnalyticsV4.instance.StartCoroutine(HandleWWW(UnityWebRequest.Post(newUrl, "")));
+	}
+	private void HandleWWWSynchronously(UnityWebRequest request)
+	{
+		var operation = request.SendWebRequest();
+		while (!operation.isDone)
+		{ }
+		LogHandleWWWResult(request);
 	}
 
 	private IEnumerator HandleWWW(UnityWebRequest request)
 	{
 		yield return request.SendWebRequest();
+		LogHandleWWWResult(request);
+	}
 
+	private void LogHandleWWWResult(UnityWebRequest request)
+	{
 		if (request.isNetworkError || request.isHttpError)
 		{
 			Debug.LogWarning("Google Analytics hit request failed with error "
@@ -188,7 +202,6 @@ public class GoogleAnalyticsMPV3
 				Debug.LogWarning("Google Analytics hit request rejected with " +
 					 "status code " + request.responseCode);
 		}
-
 	}
 
 	private string AddRequiredMPParameter(Field parameter, object value)

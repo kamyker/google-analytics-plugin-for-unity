@@ -69,6 +69,9 @@ public class GoogleAnalyticsV4 : MonoBehaviour
 
 	private GoogleAnalyticsMPV3 mpTracker = new GoogleAnalyticsMPV3();
 
+	[System.NonSerialized]
+	public bool RunSynchronously = false;
+
 	void Awake()
 	{
 		InitializeTracker();
@@ -153,6 +156,7 @@ public class GoogleAnalyticsV4 : MonoBehaviour
 
 	private void OnDestroy()
 	{
+		RunSynchronously = true;
 		StopSession();
 	}
 
